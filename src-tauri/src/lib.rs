@@ -1,5 +1,5 @@
 // SPEC: embedded-runtime (EMBED-06), self-contained-runtime (SELF-01, SELF-18),
-//       conversation-memory (MEM-14, MEM-17)
+//       conversation-memory (MEM-14, MEM-17), generated-types (TYPE-01, TYPE-03)
 
 mod chat;
 mod chat_commands;
@@ -14,6 +14,15 @@ mod providers;
 mod rag;
 mod runtime;
 mod system_info;
+/// Generates `src/types.ts` and, in the standard test run, guards it against
+/// drifting from the structs it mirrors (C-03).
+///
+/// `cfg(test)` because it has no runtime role: the app never calls it, and
+/// compiling it into the release binary would only add dead code (plus three
+/// `dead_code` warnings to every `cargo check`). The `#[derive(TS)]` impls it
+/// reads *do* ship — that trade-off is recorded in the feature's design.
+#[cfg(test)]
+mod types_export;
 mod update;
 mod update_commands;
 

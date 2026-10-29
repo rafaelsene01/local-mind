@@ -1,4 +1,5 @@
-// SPEC: self-contained-runtime (SELF-01, SELF-02, SELF-07, SELF-08)
+// SPEC: self-contained-runtime (SELF-01, SELF-02, SELF-07, SELF-08),
+//       generated-types (TYPE-02, TYPE-05, TYPE-07)
 
 use crate::config;
 use crate::db::{require_conn, DbState};
@@ -10,12 +11,13 @@ use crate::runtime::{bundled, detect, model, Backend, RuntimeError, TargetOs};
 use serde::Serialize;
 use std::path::{Path, PathBuf};
 use tauri::{AppHandle, Emitter, Manager, State};
+use ts_rs::TS;
 
 /// The states the runtime card renders. There is no `DownloadingModel` stage:
 /// downloading a GGUF is no longer part of preparing the engine, so it reports
 /// on its own channel (`model-download-progress`) and a machine with a `.gguf`
 /// already in the models folder never needs the network (SELF-11).
-#[derive(Debug, Serialize, Clone)]
+#[derive(Debug, Serialize, Clone, TS)]
 #[serde(rename_all = "snake_case")]
 pub enum RuntimeStage {
     Unsupported,
@@ -26,18 +28,29 @@ pub enum RuntimeStage {
     Running,
 }
 
-#[derive(Debug, Serialize, Clone)]
+#[derive(Debug, Serialize, Clone, TS)]
 pub struct RuntimeStatus {
     pub stage: RuntimeStage,
     pub release_tag: Option<String>,
+    // Narrowed for the frontend (TYPE-07): the only writer of this column is
+    // `choose_backend` below, which stores `Backend::as_str()` into
+    // `embedded_runtime.backend`; `status_from` copies the row straight through.
+    // Referencing the generated `Backend` keeps the union tied to the enum
+    // instead of repeating two literals the way `types.ts` used to.
+    #[ts(type = "Backend | null")]
     pub backend: Option<String>,
     pub port: Option<u16>,
     pub model_name: Option<String>,
     pub message: Option<String>,
 }
 
-#[derive(Debug, Serialize, Clone)]
-struct RuntimeProgress {
+/// Payload of the `runtime-progress` event. Named `…Event` on the TS side
+/// (`#[ts(rename)]`) because the frontend distinguishes event payloads from
+/// command returns by that suffix; renaming the Rust struct instead would touch
+/// call sites for no gain.
+#[derive(Debug, Serialize, Clone, TS)]
+#[ts(rename = "RuntimeProgressEvent")]
+pub(crate) struct RuntimeProgress {
     stage: RuntimeStage,
     progress: Option<PullProgress>,
     message: Option<String>,
@@ -376,8 +389,9 @@ pub fn runtime_status(
 
 /// Progress of a GGUF download, keyed by the URL the caller asked for so the
 /// card that started it is the one that shows the bar.
-#[derive(Debug, Serialize, Clone)]
-struct ModelDownloadProgress {
+#[derive(Debug, Serialize, Clone, TS)]
+#[ts(rename = "ModelDownloadProgressEvent")]
+pub(crate) struct ModelDownloadProgress {
     identifier: String,
     progress: PullProgress,
 }
@@ -441,14 +455,14 @@ pub async fn download_model(app: AppHandle, url: String) -> Result<(), String> {
 // `connection_id`: there is one runtime, so there is nothing to disambiguate.
 // ---------------------------------------------------------------------------
 
-#[derive(Debug, serde::Serialize, Clone)]
+#[derive(Debug, serde::Serialize, Clone, ts_rs::TS)]
 pub struct DownloadableModel {
     #[serde(flatten)]
     pub info: crate::models::catalog::CuratedModelInfo,
     pub fits_ram: bool,
 }
 
-#[derive(Debug, serde::Serialize, Clone)]
+#[derive(Debug, serde::Serialize, Clone, TS)]
 pub struct DownloadableModelsResponse {
     pub ram_detected_gb: Option<f32>,
     pub models: Vec<DownloadableModel>,
@@ -533,3 +547,4 @@ pub async fn configure_model(
     };
     apply_runtime_config(&app, &db, context_length, gpu_layers).await
 }
+

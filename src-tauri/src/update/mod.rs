@@ -1,3 +1,5 @@
+// SPEC: generated-types (TYPE-02)
+
 //! Update support (M8).
 //!
 //! Two delivery flavors share one trust root and one UI:
@@ -19,12 +21,13 @@ pub mod signature;
 
 use serde::Serialize;
 use std::path::{Path, PathBuf};
+use ts_rs::TS;
 
 /// Written into the portable zip by `scripts/make-portable.mjs`. The two sides
 /// must agree; the script has a test asserting this exact string.
 pub const PORTABLE_MARKER: &str = ".portable";
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, TS)]
 #[serde(rename_all = "lowercase")]
 pub enum InstallFlavor {
     Installed,
@@ -53,7 +56,7 @@ pub fn flavor_at(dir: Option<&Path>) -> InstallFlavor {
     }
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, TS)]
 pub struct UpdateInfo {
     pub version: String,
     pub current_version: String,

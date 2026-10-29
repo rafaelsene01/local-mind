@@ -1,5 +1,8 @@
+// SPEC: generated-types (TYPE-02, TYPE-05, TYPE-08)
+
 use super::memory_estimate::{estimate_ram_gb, Quant};
 use serde::Serialize;
+use ts_rs::TS;
 
 #[derive(Debug, Clone)]
 pub struct CuratedModel {
@@ -17,14 +20,20 @@ pub struct CuratedModel {
 
 /// Serializable projection sent to the frontend — includes the computed
 /// `estimated_ram_gb`, which isn't stored on `CuratedModel` itself.
-#[derive(Debug, Serialize, Clone)]
+#[derive(Debug, Serialize, Clone, TS)]
 pub struct CuratedModelInfo {
     pub id: String,
     pub display_name: String,
+    /// The direct `.gguf` URL — there is no registry to pull by name (SELF-02).
     pub pull_identifier: String,
     pub params_billions: f32,
     pub default_quant: String,
     pub estimated_ram_gb: f32,
+    /// Exact download size, checked against the server when the entry was added.
+    // TYPE-08: `ModelDownloadCard` divides this to draw the percentage bar; the
+    // IPC delivers a JSON number, so ts-rs's default `bigint` would both lie and
+    // break that arithmetic.
+    #[ts(type = "number | null")]
     pub download_bytes: Option<u64>,
 }
 

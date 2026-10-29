@@ -1,3 +1,5 @@
+// SPEC: generated-types (TYPE-02)
+
 //! Update commands.
 //!
 //! One surface for the frontend, two implementations behind it: the official
@@ -13,7 +15,7 @@ use tauri_plugin_updater::UpdaterExt;
 use crate::config;
 use crate::update::{self, manifest, portable, InstallFlavor, UpdateInfo};
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, ts_rs::TS)]
 pub struct UpdateSettings {
     pub current_version: String,
     pub auto_check: bool,

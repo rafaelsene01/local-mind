@@ -1,3 +1,5 @@
+// SPEC: generated-types (TYPE-02, TYPE-08)
+
 //! In-place update for the portable bundle.
 //!
 //! Windows does not let a running `.exe` be overwritten — but it *does* let it
@@ -24,9 +26,19 @@ pub const UPDATE_PROGRESS_EVENT: &str = "update-download-progress";
 const STAGING_DIR: &str = ".update";
 const OLD_SUFFIX: &str = ".old";
 
-#[derive(Clone, serde::Serialize)]
+/// Payload of the `update-download-progress` event. Emitted by both flavors —
+/// this module for the portable swap and `update_commands` for the official
+/// plugin — so the UI has one shape to render.
+///
+/// Named `UpdateProgress` on the TS side: `DownloadProgress` would collide, at
+/// reading distance, with the model download bar's payload.
+#[derive(Clone, serde::Serialize, ts_rs::TS)]
+#[ts(rename = "UpdateProgress")]
 pub struct DownloadProgress {
+    // TYPE-08: byte counts cross the IPC as JSON numbers, not BigInt.
+    #[ts(type = "number")]
     pub downloaded: u64,
+    #[ts(type = "number | null")]
     pub total: Option<u64>,
 }
 

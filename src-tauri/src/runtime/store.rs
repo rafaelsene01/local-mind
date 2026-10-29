@@ -1,3 +1,5 @@
+// SPEC: generated-types (TYPE-02)
+
 use rusqlite::{params, Connection as SqlConnection, OptionalExtension};
 
 /// The persisted half of the embedded runtime: what was downloaded and how it
@@ -62,7 +64,7 @@ pub fn load(sql: &SqlConnection) -> Result<EmbeddedRuntimeRow, String> {
 /// one runtime, so the model it is configured to start with **is** the active
 /// model. The name is the file name, which is what the user picked and what
 /// the citations and the model list show.
-#[derive(Debug, Clone, PartialEq, serde::Serialize)]
+#[derive(Debug, Clone, PartialEq, serde::Serialize, ts_rs::TS)]
 pub struct ActiveModel {
     pub name: String,
     pub path: String,

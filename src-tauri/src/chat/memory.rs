@@ -1,4 +1,5 @@
-// SPEC: conversation-memory (MEM-01, MEM-07, MEM-08, MEM-14, MEM-17, MEM-18, MEM-19, MEM-20)
+// SPEC: conversation-memory (MEM-01, MEM-07, MEM-08, MEM-14, MEM-17, MEM-18, MEM-19, MEM-20),
+//       generated-types (TYPE-02, TYPE-08)
 
 use crate::db::{require_conn, DbState};
 use crate::rag::store::{EmbeddedChunk, RetrievedChunk, VectorStore};
@@ -178,10 +179,13 @@ pub fn chat_exists(app: &AppHandle, chat_id: &str) -> bool {
 
 /// Progress of an on-demand backfill. Same shape as `DocumentStatusEvent`: the
 /// UI already knows how to show a count that climbs to a total (MEM-18).
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, ts_rs::TS)]
 pub struct MemoryBackfillProgress {
     pub chat_id: String,
+    // TYPE-08: ts-rs maps `usize` to `bigint`; the IPC sends a JSON number.
+    #[ts(type = "number")]
     pub done: usize,
+    #[ts(type = "number")]
     pub total: usize,
 }
 

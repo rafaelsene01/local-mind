@@ -1,5 +1,6 @@
 // SPEC: chat-messaging (CHAT-01, CHAT-02, CHAT-04, CHAT-05, CHAT-14),
-//       conversation-memory (MEM-01, MEM-02, MEM-03, MEM-14, MEM-16, MEM-17)
+//       conversation-memory (MEM-01, MEM-02, MEM-03, MEM-14, MEM-16, MEM-17),
+//       generated-types (TYPE-02, TYPE-07)
 
 use crate::chat::attachments;
 use crate::chat::cancellation::CancellationRegistry;
@@ -13,9 +14,10 @@ use futures_util::StreamExt;
 use rusqlite::params;
 use serde::Serialize;
 use tauri::{AppHandle, Emitter, Manager, State};
+use ts_rs::TS;
 use uuid::Uuid;
 
-#[derive(Debug, Serialize, Clone)]
+#[derive(Debug, Serialize, Clone, TS)]
 pub struct ChatStreamChunk {
     pub chat_id: String,
     pub message_id: String,
@@ -27,7 +29,7 @@ pub struct ChatStreamChunk {
 /// Emitted when the answer was produced without the knowledge base because
 /// retrieval failed. Separate from `ChatStreamChunk.error`, which means the
 /// message itself failed.
-#[derive(Debug, Serialize, Clone)]
+#[derive(Debug, Serialize, Clone, TS)]
 pub struct ChatRetrievalWarning {
     pub chat_id: String,
     pub reason: String,
@@ -139,10 +141,21 @@ pub fn set_chat_use_global_rag(
 /// What the chat shows about each file the user attached. `extracted_text` is
 /// deliberately left out: it can be thousands of characters and the UI only
 /// needs to say whether the file made it into the context (CHAT-10).
-#[derive(Debug, Serialize, Clone)]
+#[derive(Debug, Serialize, Clone, TS)]
 pub struct ChatAttachment {
     pub id: String,
     pub filename: String,
+    // Narrowed for the frontend (TYPE-07), and *widened* against what
+    // `types.ts` used to claim. Three writers, not one:
+    //   * `chat::attachments::record` inserts "injected_whole", "queued" or
+    //     "error";
+    //   * `chat::attachments::finish_attachment` copies the value out of
+    //     `documents.status`, so every `DocumentStatus` can land here —
+    //     including `parsing`/`chunking`/`embedding`, which the hand-written
+    //     union omitted;
+    //   * `document_commands::FAIL_INTERRUPTED_ATTACHMENTS` writes "error".
+    // The union of those is `DocumentStatus | "injected_whole"`.
+    #[ts(type = "DocumentStatus | \"injected_whole\"")]
     pub status: String,
     pub error_message: Option<String>,
     pub created_at: String,

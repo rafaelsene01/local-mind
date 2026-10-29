@@ -1,3 +1,5 @@
+// SPEC: generated-types (TYPE-07)
+
 pub mod bundled;
 pub mod detect;
 pub mod download;
@@ -29,7 +31,16 @@ impl TargetOs {
 /// Vulkan covers NVIDIA/AMD/Intel with a single binary and no vendor toolkit;
 /// CUDA is deliberately out of scope (AD-022). Cpu is the fallback for
 /// machines where the Vulkan build cannot even start.
-#[derive(Debug, Clone, Copy, PartialEq)]
+/// `TS` is derived even though `Backend` is never serialized by serde: the value
+/// that reaches the frontend is the string `as_str()` produces, stored in
+/// `embedded_runtime.backend` and read back into `RuntimeStatus.backend`
+/// (TYPE-07). Deriving it here is what lets that field be narrowed to the
+/// variant list instead of two hand-typed literals in `types.ts`.
+///
+/// `rename_all` restates the mapping `as_str()` performs; the two are pinned
+/// together by `types_export::tests::backend_as_str_matches_generated_union`.
+#[derive(Debug, Clone, Copy, PartialEq, ts_rs::TS)]
+#[ts(rename_all = "lowercase")]
 pub enum Backend {
     Vulkan,
     Cpu,

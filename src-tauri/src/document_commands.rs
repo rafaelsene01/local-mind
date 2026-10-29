@@ -1,3 +1,5 @@
+// SPEC: generated-types (TYPE-02, TYPE-07, TYPE-08)
+
 use crate::db::{require_conn, DbState};
 use crate::rag::parsing;
 use crate::rag::pipeline::{self, DocumentStatus};
@@ -7,6 +9,7 @@ use rusqlite::params;
 use serde::Serialize;
 use std::path::{Path, PathBuf};
 use tauri::{AppHandle, Manager, State};
+use ts_rs::TS;
 use uuid::Uuid;
 
 /// Documents are copied into the base folder, so a 200MB file would be
@@ -14,12 +17,22 @@ use uuid::Uuid;
 /// text formats and still refuses obvious mistakes early (DOC-03).
 const MAX_FILE_BYTES: u64 = 100 * 1024 * 1024;
 
-#[derive(Debug, Serialize, Clone)]
+#[derive(Debug, Serialize, Clone, TS)]
 pub struct DocumentRecord {
     pub id: String,
     pub filename: String,
     pub file_path: String,
+    // TYPE-08: the IPC serializes this u64 as a JSON number; `documentsStore`
+    // does arithmetic on it, which a `bigint` would break.
+    #[ts(type = "number")]
     pub size_bytes: u64,
+    // Narrowed for the frontend (TYPE-07): every value in `documents.status`
+    // is written by `rag::pipeline::set_status`, which passes
+    // `DocumentStatus::as_str()`; the two INSERTs that seed a row
+    // (`import_documents` below and `chat::attachments::index_large_attachment`)
+    // both write this enum's first state. `DocumentStatusBadge` switches on the
+    // union, so a plain `string` would drop that check.
+    #[ts(type = "DocumentStatus")]
     pub status: String,
     pub error_message: Option<String>,
     pub created_at: String,
@@ -93,7 +106,7 @@ const FAIL_INTERRUPTED_ATTACHMENTS: &str =
 const DELETE_BORROWED_ROWS: &str = "DELETE FROM documents WHERE namespace <> 'global'";
 
 /// A file the import refused, with the reason to show next to its name.
-#[derive(Debug, Serialize, Clone)]
+#[derive(Debug, Serialize, Clone, TS)]
 pub struct RejectedImport {
     pub path: String,
     pub reason: String,
@@ -101,7 +114,7 @@ pub struct RejectedImport {
 
 /// One bad file in a selection must not throw away the good ones (DOC-03):
 /// each is judged on its own and the rejected ones come back named.
-#[derive(Debug, Serialize, Clone)]
+#[derive(Debug, Serialize, Clone, TS)]
 pub struct ImportResult {
     pub imported: Vec<DocumentRecord>,
     pub rejected: Vec<RejectedImport>,

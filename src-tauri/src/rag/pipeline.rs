@@ -1,3 +1,5 @@
+// SPEC: generated-types (TYPE-02, TYPE-07)
+
 use super::store::{EmbeddedChunk, VectorStore};
 use super::{chunking, embedding, parsing, CHUNK_MAX_TOKENS, CHUNK_OVERLAP_TOKENS};
 use crate::db::DbState;
@@ -5,11 +7,12 @@ use rusqlite::{params, OptionalExtension};
 use serde::Serialize;
 use std::path::PathBuf;
 use tauri::{AppHandle, Emitter, Manager};
+use ts_rs::TS;
 use uuid::Uuid;
 
 /// The document's position in the pipeline. Only `Ready` is searchable, and
 /// everything before it is resumable — the app re-queues them at startup.
-#[derive(Debug, Clone, Copy, PartialEq, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, TS)]
 #[serde(rename_all = "snake_case")]
 pub enum DocumentStatus {
     Queued,
@@ -33,7 +36,7 @@ impl DocumentStatus {
     }
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, TS)]
 pub struct DocumentStatusEvent {
     pub id: String,
     pub status: DocumentStatus,

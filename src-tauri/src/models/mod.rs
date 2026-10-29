@@ -1,11 +1,13 @@
-// SPEC: app-shell (SHELL-04), chat-messaging (CHAT-14), conversation-memory (MEM-14)
+// SPEC: app-shell (SHELL-04), chat-messaging (CHAT-14), conversation-memory (MEM-14),
+//       generated-types (TYPE-02, TYPE-07)
 
 pub mod catalog;
 pub mod memory_estimate;
 
 use serde::Serialize;
+use ts_rs::TS;
 
-#[derive(Debug, Serialize, Clone)]
+#[derive(Debug, Serialize, Clone, TS)]
 pub struct Chat {
     pub id: String,
     pub title: String,
@@ -21,10 +23,15 @@ pub struct Chat {
     pub use_memory: bool,
 }
 
-#[derive(Debug, Serialize, Clone)]
+#[derive(Debug, Serialize, Clone, TS)]
 pub struct Message {
     pub id: String,
     pub chat_id: String,
+    // Narrowed for the frontend (TYPE-07): the only writer is
+    // `chat_commands::insert_message`, called with "user", "assistant" and
+    // "system" and nothing else. `MessageBubble` branches on the union, so a
+    // plain `string` here would silently drop that check.
+    #[ts(type = "\"user\" | \"assistant\" | \"system\"")]
     pub role: String,
     pub content: String,
     pub created_at: String,

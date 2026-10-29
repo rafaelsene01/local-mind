@@ -33,7 +33,6 @@ chrono = { version = "0.4", features = ["serde"] }
 sysinfo = "0.39"
 reqwest = { version = "0.12", features = ["json", "stream"] }
 tokio = { version = "1", features = ["sync", "time", "rt", "macros"] }
-async-trait = "0.1"
 futures-util = "0.3"
 zip = "2"
 # RAG stack (M5). Versions confirmed on crates.io on 2026-07-25; `dotext` was
@@ -55,6 +54,12 @@ docx-rs = "0.4"
 # same public key tauri-plugin-updater uses for the installers, so both update
 # paths share one trust root. Zero dependencies of its own.
 minisign-verify = "0.2"
+# Generates `src/types.ts` from the structs that cross the IPC boundary (C-03).
+# A normal dependency, not a dev one: the `#[derive(TS)]` lives on the lib's own
+# structs. The default `serde-compat` feature is what makes it read
+# `#[serde(flatten)]` / `rename_all` off the same attributes serde uses, which
+# is the whole point — `DownloadableModel` is a flatten and was the fragile case.
+ts-rs = "12"
 
 # Job objects, for killing the llama.cpp sidecar when this process dies by any
 # means (M7.1). Already in the tree transitively via Tauri, but declared here on

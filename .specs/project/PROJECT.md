@@ -33,7 +33,7 @@
 
 **v1 includes:**
 
-- Janela desktop com sidebar de 3 zonas: **Chats** (topo), **Documentos/base de conhecimento** (meio), **Runtime** (base)
+- Janela desktop com sidebar de **4 zonas**, na ordem em que `src/components/Sidebar/Sidebar.tsx` as renderiza: **Chats** (topo), **Documentos/base de conhecimento**, **Runtime**, **Configurações** (base). Corrigido em 2026-07-28 — o texto dizia 3 zonas e omitia Configurações, que é uma das quatro áreas do `uiStore.activeView`
 - Gerenciamento de chats (criar, listar, renomear, excluir) com histórico persistente e isolado por chat
 - Um runtime embutido (llama.cpp), com escolha automática entre os backends Vulkan e CPU, lista de modelos instalados e catálogo para baixar
 - Chat com streaming e system prompt opcional

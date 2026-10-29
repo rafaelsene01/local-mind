@@ -1,8 +1,11 @@
+// SPEC: generated-types (TYPE-02, TYPE-08)
+
 pub mod llama_server;
 pub mod openai_stream;
 
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
+use ts_rs::TS;
 
 // `HEALTH_CHECK_TIMEOUT` lived here to keep the Conexões screen from stalling on
 // an unreachable provider. Both the screen and the providers went with the M9
@@ -42,18 +45,23 @@ pub fn http_client() -> reqwest::Client {
         .expect("failed to build reqwest client")
 }
 
-#[derive(Debug, Serialize, Clone)]
+#[derive(Debug, Serialize, Clone, TS)]
 pub struct InstalledModel {
     pub name: String,
+    // TYPE-08: the Tauri IPC serializes with serde_json, which writes a u64 as a
+    // JSON number — the frontend receives a `number`, never a `BigInt`. ts-rs
+    // defaults u64 to `bigint`, which would be a lie about what arrives.
+    #[ts(type = "number | null")]
     pub size_bytes: Option<u64>,
 }
 
 /// `Verifying` was Ollama's: its pull reported a checksum phase between the
 /// download and success. A GGUF fetched by a plain GET has no such phase, and
 /// nothing has constructed the variant since the M9 removed the provider
-/// (AD-042). Removed here **and** in `src/types.ts`, which mirrors this enum by
-/// hand (C-03).
-#[derive(Debug, Serialize, Clone, PartialEq)]
+/// (AD-042). Removed here, and `src/types.ts` followed — at the time it mirrored
+/// this enum by hand (C-03), which is exactly the duplication the generated-types
+/// feature removed: the union in `types.ts` now comes from these variants.
+#[derive(Debug, Serialize, Clone, PartialEq, TS)]
 #[serde(rename_all = "snake_case")]
 pub enum PullStatus {
     Downloading,
@@ -61,10 +69,13 @@ pub enum PullStatus {
     Error,
 }
 
-#[derive(Debug, Serialize, Clone)]
+#[derive(Debug, Serialize, Clone, TS)]
 pub struct PullProgress {
     pub status: PullStatus,
+    // TYPE-08: same as `InstalledModel::size_bytes` — JSON number over the IPC.
+    #[ts(type = "number | null")]
     pub downloaded_bytes: Option<u64>,
+    #[ts(type = "number | null")]
     pub total_bytes: Option<u64>,
     pub message: Option<String>,
 }
@@ -125,7 +136,7 @@ impl<'de> Deserialize<'de> for GpuOffload {
 ///
 /// Both are optional: a plain OpenAI-compatible server reports neither, and a
 /// number invented for it would be a lie the UI would enforce.
-#[derive(Debug, Serialize, Clone, Default)]
+#[derive(Debug, Serialize, Clone, Default, TS)]
 pub struct ModelLimits {
     pub max_context: Option<u32>,
     pub current_context: Option<u32>,

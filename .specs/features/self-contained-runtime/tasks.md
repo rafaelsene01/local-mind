@@ -695,7 +695,7 @@ T5,T11,T17 → T21
 - [ ] Com a rede desligada: importar um PDF e vê-lo chegar a `ready`; perguntar sobre ele e receber citação
 - [ ] Com rede: baixar um modelo do catálogo e conversar, sem nenhuma outra etapa de download
 - [x] ⚠️ Bundle portátil extraído em pasta de usuário ~~sobe e conversa~~ — **meio feito**: extraído no scratchpad e o `llama-server.exe` de dentro dele executado (exit 0, Vulkan achando a RTX 3060). **O `LocalMind.exe` do bundle não foi aberto e ninguém conversou** — essa metade continua exigindo uma pessoa
-- [x] Gate check passa: `cargo test` **174 passando / 0 falhas / 12 ignorados** (T17 tinha 150), `npm run test:scripts` **44**, `npm run build` limpo
+- [x] Gate check passa: `cargo test` **174 passando / 0 falhas / 12 ignorados** (T17 tinha 150), `npm run test:scripts` **44**, `npm run build` limpo — *números da medição de 2026-07-27 que fechou esta task; **hoje a suíte está em 177 / 0 / 15 e os scripts em 49** (run 001). Registro histórico preservado de propósito: ele diz o que era verdade quando a task passou, e não serve como baseline atual*
 
 **Tests:** none (UAT) · **Gate:** full
 **Commit:** —

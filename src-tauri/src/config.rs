@@ -1,7 +1,10 @@
+// SPEC: generated-types (TYPE-02)
+
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::{Path, PathBuf};
 use tauri::{AppHandle, Manager};
+use ts_rs::TS;
 
 use crate::update::{self, InstallFlavor};
 
@@ -10,7 +13,7 @@ use crate::update::{self, InstallFlavor};
 /// machine dirty and does not survive being copied to another computer.
 pub const PORTABLE_DATA_DIR: &str = "data";
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, TS)]
 pub struct AppConfig {
     pub base_path: String,
     pub theme: String,
@@ -154,7 +157,7 @@ pub fn db_path(base_path: &Path) -> PathBuf {
 /// logged the failure and left the database unopened, so the app came up
 /// looking normal and every single command failed with "Nenhuma pasta de
 /// armazenamento configurada ainda". The spec asks for a warning and the wizard.
-#[derive(Debug, Serialize, PartialEq, Eq)]
+#[derive(Debug, Serialize, PartialEq, Eq, TS)]
 pub struct StorageStatus {
     pub configured: bool,
     pub ready: bool,

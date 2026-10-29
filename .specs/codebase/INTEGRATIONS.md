@@ -97,5 +97,8 @@ Não há fila nem scheduler. O que existe de assíncrono:
 | `model-download-progress` | `{ identifier, progress: PullProgress }` | `runtimeStore.ts` — `identifier` é a URL do `.gguf` |
 | `chat-stream-chunk` | `{ chat_id, message_id, delta, done, error }` | `chatStore.ts` |
 | `chat-retrieval-warning` | `{ chat_id, reason }` | `chatStore.ts` |
+| `memory-backfill-progress` | `{ chat_id, done, total }` | `chatStore.ts` — barra do botão "indexar histórico"; emitido por `chat/memory.rs::backfill` a cada turno (MEM-18) |
 | `document-status` | `{ id, status, error_message }` | `documentsStore.ts` |
 | `update-download-progress` | `{ downloaded, total }` | `updateStore.ts` (só no modo portátil) |
+
+São **8** eventos (conferido em 2026-07-28 casando os `app.emit` do Rust com os `listen()` de `src/store/`). O `memory-backfill-progress` faltava nesta tabela desde o M6.
